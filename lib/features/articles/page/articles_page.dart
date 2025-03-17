@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:user_articles/app/core/enums.dart';
@@ -24,7 +25,7 @@ class ArticlesPage extends StatelessWidget {
       body: BlocProvider<ArticlesCubit>(
         create: (context) => ArticlesCubit(
           articlesRepository: ArticlesRepository(
-            remoteDataSource: ArticlesRemoteDioDataSorce(),
+            remoteDataSource: ArticlesRemoteRetrofitDataSorce(Dio()),
           ),
         )..fetchData(
             authorId: author.id,
@@ -34,8 +35,13 @@ class ArticlesPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
               child: CircleAvatar(
-                backgroundImage: NetworkImage(author.picture),
+                backgroundImage: author.picture != null
+                    ? NetworkImage(author.picture!)
+                    : null,
                 radius: 50,
+                child: author.picture == null
+                    ? const Icon(Icons.person, size: 50)
+                    : null,
               ),
             ),
             Expanded(
@@ -46,10 +52,12 @@ class ArticlesPage extends StatelessWidget {
                       return const Center(
                         child: Text('Initial state'),
                       );
+
                     case Status.loading:
                       return const Center(
                         child: CircularProgressIndicator(),
                       );
+
                     case Status.success:
                       if (state.results.isEmpty) {
                         return const Center(
@@ -58,12 +66,13 @@ class ArticlesPage extends StatelessWidget {
                       }
                       return ListView(
                         children: [
-                          for (final author in state.results)
+                          for (final article in state.results)
                             _ArticleItemWidget(
-                              model: author,
+                              model: article,
                             ),
                         ],
                       );
+
                     case Status.error:
                       return Center(
                         child: Text(
@@ -84,6 +93,7 @@ class ArticlesPage extends StatelessWidget {
   }
 }
 
+// Poprawna definicja _ArticleItemWidget (POZA klasą ArticlesPage)
 class _ArticleItemWidget extends StatelessWidget {
   const _ArticleItemWidget({
     Key? key,

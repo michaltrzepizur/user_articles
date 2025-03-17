@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:user_articles/app/core/enums.dart';
@@ -19,7 +20,7 @@ class HomePage extends StatelessWidget {
         create: (context) {
           return HomeCubit(
             authorsRepository: AuthorsRepository(
-              remoteDataSource: AuthorsRemoteDioDataSorce(),
+              remoteDataSource: AuthorsRemoteRetrofitDataSorce(Dio()),
             ),
           )..start();
         },
@@ -93,8 +94,7 @@ class _AuthorItemWidget extends StatelessWidget {
             children: [
               CircleAvatar(
                 backgroundImage: NetworkImage(
-                  model.picture,
-                ),
+                    model.picture ?? 'https://via.placeholder.com/150'),
               ),
               const SizedBox(width: 10),
               Expanded(
